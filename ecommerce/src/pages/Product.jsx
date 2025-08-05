@@ -15,7 +15,7 @@ const Product = () => {
     products.forEach((item) => {
       if (item._id === productId) {
         setProductData(item);
-        console.log(item);
+        // console.log(item);
         setImage(item.image[0]);
       }
     });
