@@ -16,7 +16,7 @@ const loginUser = async (req,res)=>{
         const {email,password} = req.body;
         const user = await userModel.findOne({email});
         if (!user) {
-            return res.json({success:false,messgage:"User doesn't exists"})
+            return res.json({success:false,message:"User doesn't exists"})
         }
         const isMatch = await bcrypt.compare(password,user.password);
         if (isMatch) {
@@ -43,14 +43,14 @@ const registerUser = async (req,res)=>{
         //checking user already exists or not
         const exists = await userModel.findOne({email});
         if (exists) {
-            return res.json({success:false,messgage:"User already exists"})
+            return res.json({success:false,message:"User already exists"})
         }
         //validating email format and strong password
         if (!validator.isEmail(email)) {
-            return res.json({success:false,messgage:"Enter a valid E-Mail"})   
+            return res.json({success:false,message:"Enter a valid E-Mail"})   
         }
         if (password.length <8) {
-            return res.json({success:false,messgage:"Enter a strong password"})
+            return res.json({success:false,message:"Enter a strong password"})
         }
         //hashing user password
         const salt = await bcrypt.genSalt(10)
