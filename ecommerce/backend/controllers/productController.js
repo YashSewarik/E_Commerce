@@ -5,7 +5,9 @@ import productModel from '../models/productModel.js';
 
 const addProduct = async (req, res) => {
     try {
-        const { name, description, price, category, subCategory, sizes, bestseller } = req.body;
+        // accept either 'bestSeller' (camelCase) or 'bestseller' (lowercase) from client
+        const { name, description, price, category, subCategory, sizes } = req.body;
+        const bestseller = req.body.bestSeller ?? req.body.bestseller;
 
         // Validate required fields
         if (!name || !description || !price || !category || !subCategory || !sizes) {
@@ -59,7 +61,7 @@ const addProduct = async (req, res) => {
             category,
             price: Number(price),
             subCategory,
-            bestSeller: bestseller === "true",
+            bestSeller: bestseller === "true" || bestseller === true,
             sizes: sizesArray,
             image: imagesUrl,
             date: Date.now()

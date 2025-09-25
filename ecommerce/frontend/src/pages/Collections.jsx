@@ -31,64 +31,61 @@ const Collections = () => {
     }
   }
 
-  const applyFilter = ()=>{
-
+  // Apply filters and then sort the result before setting state to avoid effect loops.
+  const applyFilter = () => {
     let productsCopy = products.slice();
 
-    if(showSearch&&search){
-      productsCopy = productsCopy.filter(item =>item.name.toLowerCase().includes(search.toLowerCase()));
+    if (showSearch && search) {
+      productsCopy = productsCopy.filter((item) =>
+        item.name.toLowerCase().includes(search.toLowerCase())
+      );
     }
 
-    if(category.length>0){
-      productsCopy = productsCopy.filter(item =>category.includes(item.category));
+    if (category.length > 0) {
+      productsCopy = productsCopy.filter((item) =>
+        category.includes(item.category)
+      );
     }
 
-    if(subCategory.length>0){
-      productsCopy = productsCopy.filter(item=> subCategory.includes(item.subCategory));
+    if (subCategory.length > 0) {
+      productsCopy = productsCopy.filter((item) =>
+        subCategory.includes(item.subCategory)
+      );
     }
 
-    setFilterProducts(productsCopy)
-
-  }
-
-  const sortProduct = () =>{
-    let fpCopy = filterProducts.slice();
-    switch(sortType){
+    // Sort the filtered array according to sortType before updating state.
+    switch (sortType) {
       case 'low-high':
-        setFilterProducts(fpCopy.sort((a,b)=>(a.price-b.price)));
+        productsCopy.sort((a, b) => a.price - b.price);
         break;
-
       case 'high-low':
-        setFilterProducts(fpCopy.sort((a,b)=>(b.price-a.price)));
+        productsCopy.sort((a, b) => b.price - a.price);
         break;
-
       default:
-        applyFilter();
+        // keep relevance/default order
         break;
     }
-  }
 
-  // useEffect(()=>{
+    setFilterProducts(productsCopy);
+  }
+ 
+  // useEffect(()=>{ 
   //   setFilterProducts(products);
   // },[])
-
-  useEffect(()=>{
-    applyFilter(products)
-  },[category,subCategory,search,showSearch])
-
-  useEffect(()=>{
-    sortProduct();
-  },[sortType])
-
-
+ 
+  // Re-run filtering + sorting when products, filters, search or sortType change.
+  useEffect(() => {
+    applyFilter();
+  }, [products, category, subCategory, search, showSearch, sortType]);
+ 
   // useEffect(()=>{
   //   console.log(category);
   // },[category])
-
+ 
   // useEffect(()=>{
   //   console.log(subCategory);
   // },[subCategory])
-
+ 
   return (
     <div className='flex flex-col sm:flex-row gap-1 sm:gap-10 pt-10 border-t'> 
 

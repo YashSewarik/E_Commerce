@@ -2,10 +2,9 @@ import React from 'react'
 
 const NewsletterBox = () => {
 
-const onSubmitHandler = () => {
-    Event.preventDefault();
-    
-
+const onSubmitHandler = (e) => {
+    e.preventDefault();
+    // TODO: add subscribe handling (API call or local logic)
 }
 
   return (
