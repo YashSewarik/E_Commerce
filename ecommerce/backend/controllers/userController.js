@@ -3,7 +3,6 @@ import validator from 'validator';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-
 const createToken = (id)=>{
     return jwt.sign({id},process.env.JWT_SECRET)
 }
@@ -73,18 +72,24 @@ const registerUser = async (req,res)=>{
 }
 
 //route for admin login
-
 const adminLogin = async (req,res)=>{
 
     try {
         
         const {email,password} = req.body;
+        // validate credentials first
+        if (!email || !password) {
+            return res.status(400).json({ success:false, message: 'Missing credentials' });
+        }
+
         if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
-            const token = jwt.sign(email+password,process.env.JWT_SECRET)
-            res.json({success:true,token})
+            // create a structured token payload for admin
+            const token = jwt.sign({ email, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1d' });
+            console.log('adminLogin: admin authenticated, token issued for', email);
+            return res.json({success:true,token});
         }
         else{
-            res.json({success:false,message:'Invalid Credentials'})
+            return res.status(401).json({success:false,message:'Invalid Credentials'})
         }
 
     } catch (error) {
