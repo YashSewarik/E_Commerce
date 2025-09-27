@@ -1,10 +1,51 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { ShopContext } from '../context/ShopContext'
 import Title from '../components/Title';
+import axios from 'axios';
 
 
 const Orders = () => {
-const {products,currency} = useContext(ShopContext);
+const {backendUrl,token,currency} = useContext(ShopContext);
+const [orderData,setOrderData] = useState([])
+
+const loadOrderData= async()=>{
+  try {
+    if (!token) {
+      console.log('Orders: no token yet');
+      return;
+    }
+    console.log('Orders -> requesting userorders', { url: `${backendUrl}/api/order/userorders`, tokenPresent: !!token });
+    const response = await axios.post(
+      `${backendUrl}/api/order/userorders`,
+      {},
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    console.log('Orders -> response', response?.data);
+    if (response?.data?.success) {
+      const allOrderItems = [];
+      response.data.orders.forEach((order) => {
+        order.items.forEach((item) => {
+          const it = { ...item };
+          it.status = order.status;
+          it.payment = order.payment;
+          it.paymentMethod = order.paymentMethod;
+          it.date = order.date;
+          allOrderItems.push(it);
+        });
+      });
+      setOrderData(allOrderItems);
+      console.log('Orders -> setOrderData count', allOrderItems.length);
+    } else {
+      console.error('Orders -> API returned no success', response?.data);
+    }
+  } catch (error) {
+    console.error('Orders -> request error', error?.response ?? error);
+  }
+}
+
+useEffect(()=>{
+  loadOrderData()
+},[token])
 
   return (
     <div className='border-t pt-16'>
@@ -13,27 +54,28 @@ const {products,currency} = useContext(ShopContext);
       </div>
       <div className=''>
         {
-          products.slice(1,4).map((item,index)=>(
+          orderData.map((item,index)=>(
             <div key={index} className='py-4 border-t border-b text-gray-700 flex flx-col md:flex-row md:items-center md:justify-between gap-4'>
               <div className='flex items-start gap-6 text-sm'>
                 <img src={item.image[0]} className='w-16 sm:w-20' alt="" />
                 <div>
                   <p className='sm:text-base font-medium'>{item.name}</p>
-                  <div className='flex items-center gap-3 mt-2 text-base text-gray-700'>
-                    <p className='text-lg'>{currency}{item.price}</p>
-                    <p>Quantity: 1</p>
-                    <p>Size: M</p>
+                  <div className='flex items-center gap-3 mt-1 text-base text-gray-700'>
+                    <p >{currency}{item.price}</p>
+                    <p>Quantity: {item.quantity}</p>
+                    <p>Size: {item.size}</p>
                   </div>
-                  <p className='mt-2'>Date: <span className='text-gray-400'>25,July, 2025</span></p>
+                  <p className='mt-1'>Date: <span className='text-gray-400'>{new Date(item.date).toDateString()}</span></p>
+                  <p className='mt-1'>Payment: <span className='text-gray-400'>{item.paymentMethod}</span></p>
                 </div>
                 
               </div>
               <div className='w-1/2 flex justify-between'>
                   <div className='flex items-center gap-2'>
                     <p className='min-w-2 h-2 rounded-full bg-green-500'></p>
-                    <p className='text-sm md:text-base'>Ready to ship</p>
+                    <p className='text-sm md:text-base'>{item.status}</p>
                   </div>
-                  <button className='border cursor-pointer px-4 py-2 text-sm font-medium rounded-sm'>Track Order</button>
+                  <button onClick={loadOrderData} className='border cursor-pointer px-4 py-2 text-sm font-medium rounded-sm'>Track Order</button>
                 </div>
             </div>
           ))

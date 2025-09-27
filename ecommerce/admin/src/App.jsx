@@ -8,7 +8,8 @@ import Orders from "./pages/Orders";
 import Login from "./components/Login";
 import { ToastContainer } from 'react-toastify';
 
-export const backendUrl= import.meta.env.VITE_BACKEND_URL;
+// fallback to localhost if VITE env is missing or misformatted
+export const backendUrl = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:4000';
 export const currency = '$'
 
 const App = () => {
